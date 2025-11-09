@@ -4,7 +4,7 @@ A complete Discord music bot built with Discord.js v14, DisTube, and yt-dlp inte
 
 ## 🎵 Features
 
-- **Music Streaming**: Support for YouTube, SoundCloud, and Spotify
+- **Music Streaming**: Full YouTube support (search, playlists, radio). SoundCloud direct URLs supported via yt-dlp
 - **YouTube Premium**: Ad-free experience with cookie authentication
 - **Slash Commands**: Modern Discord slash command interface with 20+ commands
 - **Auto-play**: Rythm-like auto-play functionality for continuous music
@@ -214,7 +214,7 @@ All commands use Discord's slash command system. Start typing `/` in Discord to 
 
 | Command | Parameters | Description | Example |
 |---------|-----------|-------------|---------|
-| `/play` | `query` (required) | Play a song or add to queue. Accepts song names, artists, or URLs (YouTube, SoundCloud, Spotify) | `/play Never Gonna Give You Up`<br>`/play https://youtu.be/dQw4w9WgXcQ` |
+| `/play` | `query` (required) | Play a song or add to queue. Search by name/artist (finds YouTube), or paste direct URLs (YouTube/SoundCloud) | `/play Never Gonna Give You Up`<br>`/play https://youtu.be/dQw4w9WgXcQ`<br>`/play https://soundcloud.com/artist/track` |
 | `/playnow` | `query` (required) | Play a song immediately, clearing current queue and starting fresh with auto-play enabled | `/playnow Neelix Promise` |
 | `/search` | `query` (required) | Search for songs and select from dropdown menu (up to 5 results) | `/search Rick Astley` |
 | `/np` | None | Show currently playing song with progress bar and seek buttons | `/np` |
@@ -260,6 +260,40 @@ All commands use Discord's slash command system. Start typing `/` in Discord to 
 - **Search Dropdown**: When using `/search`, select from up to 5 results via dropdown menu
 
 - **Auto-play**: Automatically finds and plays similar songs when queue ends (enabled by default on `/play` and `/playnow`)
+
+## 🎧 Supported Music Sources
+
+### ✅ YouTube (Full Support)
+- ✅ **Search by name/artist** - Type song names, artist names, or search queries
+- ✅ **Direct URLs** - Single videos, playlists, radio/mixes
+- ✅ **Auto-play** - Finds similar songs automatically
+- ✅ **Playlists** - Load entire playlists (up to 100 songs)
+- ✅ **Radio/Mixes** - YouTube auto-generated mixes (up to 50 songs)
+
+**Examples:**
+```
+/play Never Gonna Give You Up
+/play Rick Astley
+/play https://youtu.be/dQw4w9WgXcQ
+/playlist url:https://youtube.com/playlist?list=...
+```
+
+### ✅ SoundCloud (Direct URLs Only)
+- ✅ **Direct URLs work** - Paste SoundCloud track URLs
+- ❌ **No search** - Searching by name finds YouTube instead (intentional)
+- ⚠️ **Limited features** - Basic playback only, no playlists
+
+**Examples:**
+```
+/play https://soundcloud.com/artist/track-name
+```
+
+**Note:** When you search by name (e.g., `/play artist name`), the bot always searches YouTube. This is by design and ensures you get high-quality results. To play from SoundCloud, paste the direct URL.
+
+### ❌ Spotify (Not Supported)
+- ❌ Spotify URLs do not work
+- ❌ Cannot download from Spotify directly
+- ℹ️ Alternative: Search for the same song on YouTube instead
 
 ## 🔧 Configuration
 
@@ -613,7 +647,7 @@ tail -f logs/bot-2025-11-09.log  # Follow in real-time
 ✅ **Queue Management**: Jump, remove, shuffle, and clear queue operations  
 ✅ **Rich Embeds**: Progress bars and detailed song information  
 ✅ **Smart Notifications**: Context-aware messages and status updates  
-✅ **Multiple Sources**: YouTube, SoundCloud, Spotify support  
+✅ **YouTube & SoundCloud**: Full YouTube support + SoundCloud direct URLs  
 ✅ **24/7 Operation**: Can run as Windows service
 
 ---
