@@ -30,7 +30,7 @@ A complete Discord music bot built with Discord.js v14, DisTube, and yt-dlp inte
 
 1. **Clone or download this repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/yourusername/discord-music-bot.git
    cd discord-music-bot
    ```
 
@@ -39,20 +39,111 @@ A complete Discord music bot built with Discord.js v14, DisTube, and yt-dlp inte
    npm install
    ```
 
+   **⚠️ IMPORTANT:** After `npm install`, you MUST rebuild native modules:
+   ```bash
+   npm rebuild
+   ```
+   
+   This is critical because:
+   - Native modules (ffmpeg-static, sodium-native, @discordjs/opus) are platform-specific
+   - If you copy files from another PC, they need to be rebuilt for your current machine
+   - Skipping this step will cause FFMPEG and voice connection errors
+
 3. **Set up environment variables**
-   - Copy `.env.example` to `.env`
+   - Create a `.env` file in the project root
    - Add your Discord bot token:
    ```env
    DISCORD_TOKEN=your_bot_token_here
    ```
+   
+   **Get your Discord bot token:**
+   - Go to [Discord Developer Portal](https://discord.com/developers/applications)
+   - Create a new application or select existing one
+   - Go to "Bot" section → Copy the token
+   - Paste into `.env` file
 
-4. **Configure YouTube Premium (Optional)**
-   - See [YouTube Premium Setup](#youtube-premium-setup) section below
-
-5. **Start the bot**
+4. **Test the bot**
    ```bash
    npm start
    ```
+   
+   You should see:
+   ```
+   🎵 Music Bot is ready!
+      Logged in as: YourBotName#1234
+      Bot ID: 1234567890
+      Servers: 1
+      yt-dlp: Installed at node_modules/@distube/yt-dlp/bin/yt-dlp.exe
+      FFmpeg: C:\path\to\node_modules\ffmpeg-static\ffmpeg.exe
+   ✅ Slash commands registered successfully!
+   ```
+
+5. **Configure YouTube Premium (Optional)**
+   - See [YouTube Premium Setup](#youtube-premium-setup) section below
+
+### ⚠️ First Time Setup on New PC - Important!
+
+If you're cloning this repository on a new PC or moving it from another computer, follow these steps to avoid common errors:
+
+#### Step 1: Clean Install Dependencies
+```bash
+# Remove node_modules if they were copied from another PC
+rmdir /s /q node_modules  # Windows
+rm -rf node_modules        # Linux/Mac
+
+# Fresh install
+npm install
+
+# Rebuild native modules for your platform (CRITICAL!)
+npm rebuild
+```
+
+#### Step 2: Verify FFMPEG Installation
+```bash
+# Run diagnostics
+npm run test-service
+```
+
+Look for:
+- ✅ ffmpeg-static installed
+- ✅ Path to ffmpeg.exe shown
+- ✅ Exists: YES
+
+#### Step 3: Test Before Running as Service
+```bash
+# Always test with npm start first
+npm start
+```
+
+Join a voice channel and try `/play [song]`. If music plays, you're good to go!
+
+#### Step 4: Kill Any Existing Processes
+Before running as service, make sure no other instances are running:
+```powershell
+# Kill all node processes
+taskkill /F /IM node.exe
+```
+
+### 🎵 Bot Working Successfully
+
+When everything is configured correctly, you'll see:
+
+![Bot Playing Music Successfully](docs/images/bot-working.png)
+
+Features shown:
+- ✅ Auto-play enabled
+- ✅ Song playing with progress bar
+- ✅ Interactive seek buttons (-30s, -10s, +10s, +30s)
+- ✅ Queue showing next song
+- ✅ Volume and duration displayed
+
+### ❌ Common Error After Cloning
+
+If you forget to rebuild native modules, you'll see this error:
+
+![FFMPEG Error](docs/images/ffmpeg-error.png)
+
+**Fix:** Run `npm rebuild` and restart the bot
 
 ## 🤖 Discord Bot Setup
 
@@ -291,10 +382,38 @@ async function handleMyCommand(interaction) {
 - Check if slash commands are registered (takes ~5 seconds after bot starts)
 
 **FFMPEG errors or "FFMPEG not installed":**
-- The bot requires FFMPEG for audio processing
-- Solution: `ffmpeg-static` is installed automatically with `npm install`
-- If error persists: Run `npm rebuild` to rebuild native modules
-- On Windows: FFMPEG binary is at `node_modules\ffmpeg-static\ffmpeg.exe`
+
+This is the most common error when cloning to a new PC. You'll see:
+```
+Could not play the song. ffmpeg is not installed at 'ffmpeg' path
+```
+
+**Why it happens:**
+- Native modules contain platform-specific binaries (Windows .exe, Linux .so, etc.)
+- Copying `node_modules` from another PC brings the wrong binaries
+- `ffmpeg-static` package contains the FFMPEG binary for your platform
+
+**Solution (ALWAYS do this on a new PC):**
+```bash
+# Step 1: Remove old node_modules
+rmdir /s /q node_modules  # Windows
+rm -rf node_modules        # Linux/Mac
+
+# Step 2: Fresh install
+npm install
+
+# Step 3: Rebuild native modules (CRITICAL!)
+npm rebuild
+
+# Step 4: Verify FFMPEG is installed
+npm run test-service
+```
+
+**Verify the fix:**
+- Run `npm start`
+- Join voice channel
+- Try `/play Never Gonna Give You Up`
+- Music should play immediately
 
 **"yt-dlp.exe ENOENT" error:**
 - This means yt-dlp binary wasn't downloaded during installation
@@ -302,12 +421,73 @@ async function handleMyCommand(interaction) {
 - The binary will be downloaded automatically (~10MB)
 - Restart the bot after installing
 
+**"Unknown interaction" or "Interaction has already been acknowledged" errors:**
+
+You'll see:
+```
+DiscordAPIError[10062]: Unknown interaction
+DiscordAPIError[40060]: Interaction has already been acknowledged
+```
+
+**Why it happens:**
+- Multiple bot instances running at the same time
+- Each instance tries to respond to the same command
+- First response succeeds, others fail with "already acknowledged"
+
+**Solution:**
+```powershell
+# Windows: Kill all node processes
+taskkill /F /IM node.exe
+
+# Linux/Mac
+pkill node
+
+# Then start only ONE instance
+npm start
+
+# OR if running as service:
+net start "Discord Music Bot"
+```
+
 **Music doesn't play / Bot stuck on "thinking":**
-- Check if the bot has "Connect" and "Speak" permissions in voice channel
-- Ensure you're in a voice channel when using music commands
-- Try a different song/URL
-- Check logs: `type logs\error-*.log` (Windows) or `cat logs/error-*.log` (Unix)
-- If running as service: See **[SERVICE-SETUP.md](SERVICE-SETUP.md)** troubleshooting section
+
+**Symptoms:**
+- `/play` command shows "thinking..." forever
+- Never responds or times out
+- `/np` says "nothing is playing"
+- Logs show "Attempting to join voice channel" but nothing after
+
+**Common Causes & Solutions:**
+
+1. **FFMPEG not installed/rebuilt** (most common)
+   - Solution: `npm rebuild` (see FFMPEG section above)
+
+2. **Running as Windows service with wrong account**
+   - Service runs under SYSTEM account which lacks permissions
+   - Solution: Configure service to run under your Windows account
+   - See [SERVICE-SETUP.md](SERVICE-SETUP.md) → "Service account permissions"
+
+3. **Missing voice permissions**
+   - Bot needs "Connect" and "Speak" permissions
+   - Check voice channel permissions for the bot role
+
+4. **Network/firewall blocking voice connection**
+   - Check logs: `type logs\error-*.log`
+   - Look for "timeout" or "connection" errors
+
+**Quick diagnostic:**
+```powershell
+# Check if it works manually (not as service)
+npm start
+# Join voice channel
+# Try /play [song]
+
+# If works manually but not as service:
+# -> Service account permission issue (see SERVICE-SETUP.md)
+
+# If doesn't work at all:
+# -> FFMPEG issue, run: npm rebuild
+```
 
 **"No results found" errors:**
 - Make sure yt-dlp is properly installed (see above)
@@ -438,4 +618,66 @@ tail -f logs/bot-2025-11-09.log  # Follow in real-time
 
 ---
 
+## ⚡ Quick Reference: Errors After Cloning
+
+### Error: "ffmpeg is not installed at 'ffmpeg' path"
+```bash
+# Fix:
+rmdir /s /q node_modules  # Remove old modules
+npm install                # Fresh install
+npm rebuild                # Rebuild for your platform
+npm start                  # Test
+```
+
+### Error: "Unknown interaction" or duplicate responses
+```bash
+# Fix:
+taskkill /F /IM node.exe  # Kill all node processes
+npm start                  # Start only one instance
+```
+
+### Error: Bot stuck on "thinking" when playing music
+```bash
+# Fix 1: Rebuild native modules
+npm rebuild
+npm start
+
+# Fix 2: If running as service, configure account
+# Open services.msc → Discord Music Bot → Properties
+# Log On tab → "This account" → Enter your Windows account
+```
+
+### Error: DisTubeError [INVALID_TYPE]
+This was a configuration error in the code (already fixed in this repository).
+If you see this, pull the latest version:
+```bash
+git pull origin master
+npm install
+npm rebuild
+```
+
+### First Time Setup Checklist
+- [ ] Clone repository
+- [ ] Run `npm install`
+- [ ] Run `npm rebuild` (CRITICAL!)
+- [ ] Create `.env` file with Discord token
+- [ ] Run `npm start` to test
+- [ ] Try `/play` command in Discord
+- [ ] Music plays? ✅ Good to go!
+- [ ] Want 24/7? Install as service (see SERVICE-SETUP.md)
+
+---
+
 **Enjoy your Discord music bot! 🎵**
+
+## 📸 Adding Screenshots
+
+Screenshots are referenced in this README but need to be added manually:
+
+1. Save your Discord screenshots as:
+   - `docs/images/bot-working.png` - Bot playing music successfully
+   - `docs/images/ffmpeg-error.png` - FFMPEG error message
+
+2. The screenshots will automatically appear in the [Installation](#installation) section
+
+3. See `docs/images/README.md` for image guidelines
