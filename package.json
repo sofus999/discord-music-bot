@@ -1,0 +1,41 @@
+{
+  "name": "discord-music-bot",
+  "version": "1.0.0",
+  "description": "A complete Discord music bot with DisTube integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "install-service": "node install-service.js",
+    "uninstall-service": "node uninstall-service.js",
+    "test-service": "node test-service.js"
+  },
+  "keywords": [
+    "discord",
+    "music",
+    "bot",
+    "distube",
+    "youtube"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.19.0",
+    "@distube/yt-dlp": "^2.0.0",
+    "@snazzah/davey": "^0.1.7",
+    "discord.js": "^14.16.0",
+    "distube": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "ffmpeg": "^0.0.4",
+    "ffmpeg-static": "^5.2.0",
+    "node-windows": "^1.0.0-beta.8",
+    "sodium-native": "^5.0.9",
+    "tweetnacl": "^1.0.3",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.9.0"
+  }
+}
