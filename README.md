@@ -182,6 +182,7 @@ To use YouTube Premium features (ad-free experience), you need to export your br
    - Firefox: [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)
 
 2. **Export cookies**
+   - Download Chrome Extension [Get Cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
    - Go to [YouTube](https://youtube.com)
    - Make sure you're logged in with your Premium account
    - Click the extension icon
